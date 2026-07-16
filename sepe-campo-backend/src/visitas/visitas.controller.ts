@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { VisitasService } from './visitas.service';
 import { CreateVisitaDto } from './dto/create-visita.dto';
 import { UpdateVisitaDto } from './dto/update-visita.dto';
@@ -8,27 +8,31 @@ export class VisitasController {
   constructor(private readonly visitasService: VisitasService) {}
 
   @Post()
-  create(@Body() createVisitaDto: CreateVisitaDto) {
+  async create(@Body() createVisitaDto: CreateVisitaDto) {
     return this.visitasService.create(createVisitaDto);
   }
 
   @Get()
-  findAll() {
-    return this.visitasService.findAll();
+  async findAll(@Query('tecnico_id') tecnicoId?: string) {
+    return this.visitasService.findAll(tecnicoId);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.visitasService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    return this.visitasService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateVisitaDto: UpdateVisitaDto) {
-    return this.visitasService.update(+id, updateVisitaDto);
+  async update(
+    @Param('id') id: string,
+    @Body() updateVisitaDto: UpdateVisitaDto,
+  ) {
+    return this.visitasService.update(id, updateVisitaDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.visitasService.remove(+id);
+  async remove(@Param('id') id: string) {
+    await this.visitasService.remove(id);
+    return { message: 'Visita eliminada correctamente' };
   }
 }

@@ -8,5 +8,6 @@ import { Visita } from './entities/visita.entity';
   imports: [TypeOrmModule.forFeature([Visita])],
   controllers: [VisitasController],
   providers: [VisitasService],
+  exports: [VisitasService],
 })
 export class VisitasModule {}

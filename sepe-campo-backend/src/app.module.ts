@@ -4,6 +4,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { VisitasModule } from './visitas/visitas.module';
+import { UsuariosBeneficiariosModule } from './usuarios-beneficiarios/usuarios-beneficiarios.module';
+import { ApoyosModule } from './apoyos/apoyos.module';
+import { TramosModule } from './tramos/tramos.module';
+import { ValidacionesModule } from './validaciones/validaciones.module';
+import { ConsolidadoModule } from './consolidado/consolidado.module';
+import { InformeTecnicoModule } from './informe-tecnico/informe-tecnico.module';
+import { ExportacionExcelModule } from './exportacion-excel/exportacion-excel.module';
 
 @Module({
   imports: [
@@ -19,6 +26,13 @@ import { VisitasModule } from './visitas/visitas.module';
       synchronize: true,
     }),
     VisitasModule,
+    UsuariosBeneficiariosModule,
+    ApoyosModule,
+    TramosModule,
+    ValidacionesModule,
+    ConsolidadoModule,
+    InformeTecnicoModule,
+    ExportacionExcelModule,
   ],
   controllers: [AppController],
   providers: [AppService],

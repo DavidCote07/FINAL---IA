@@ -1,26 +1,54 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Visita } from './entities/visita.entity';
 import { CreateVisitaDto } from './dto/create-visita.dto';
 import { UpdateVisitaDto } from './dto/update-visita.dto';
 
 @Injectable()
 export class VisitasService {
-  create(createVisitaDto: CreateVisitaDto) {
-    return 'This action adds a new visita';
+  constructor(
+    @InjectRepository(Visita)
+    private visitasRepository: Repository<Visita>,
+  ) {}
+
+  async create(createVisitaDto: CreateVisitaDto): Promise<Visita> {
+    const visita = this.visitasRepository.create(createVisitaDto);
+    return this.visitasRepository.save(visita);
   }
 
-  findAll() {
-    return `This action returns all visitas`;
+  async findAll(tecnicoId?: string): Promise<Visita[]> {
+    if (tecnicoId) {
+      return this.visitasRepository.find({
+        where: { tecnico_id: tecnicoId },
+        order: { fecha: 'DESC' },
+      });
+    }
+    return this.visitasRepository.find({
+      order: { fecha: 'DESC' },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} visita`;
+  async findOne(id: string): Promise<Visita> {
+    const visita = await this.visitasRepository.findOne({
+      where: { id },
+    });
+
+    if (!visita) {
+      throw new NotFoundException(`Visita ${id} no encontrada`);
+    }
+
+    return visita;
   }
 
-  update(id: number, updateVisitaDto: UpdateVisitaDto) {
-    return `This action updates a #${id} visita`;
+  async update(id: string, updateVisitaDto: UpdateVisitaDto): Promise<Visita> {
+    await this.findOne(id); // Valida que existe
+    await this.visitasRepository.update(id, updateVisitaDto);
+    return this.findOne(id);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} visita`;
+  async remove(id: string): Promise<void> {
+    const visita = await this.findOne(id);
+    await this.visitasRepository.remove(visita);
   }
 }

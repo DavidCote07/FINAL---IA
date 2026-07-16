@@ -1,53 +1,250 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# SEPE Campo - Backend API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Backend del sistema de gestión de visitas de verificación de obra eléctrica.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## 🚀 Descripción General
 
-## Description
+Este proyecto es un backend construido con **NestJS** que implementa todas las especificaciones técnicas (SPEC-01 a SPEC-09) del proyecto SEPE Campo. Proporciona una API REST completa para:
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- ✅ Gestión de visitas de verificación
+- ✅ Registro de usuarios beneficiarios
+- ✅ Captura de apoyos (postes) y estructuras
+- ✅ Registro de tramos y cálculo de conductor ACSR
+- ✅ Motor de validación de inconsistencias (Sistema Experto)
+- ✅ Consolidado de cantidades
+- ✅ Generación de informes técnicos
+- ✅ Exportación a Excel corporativo
 
-## Project setup
+## 📋 Módulos Implementados
+
+| Módulo | Descripción | Endpoint |
+|--------|-------------|----------|
+| **Visitas** | Gestión de visitas de campo | `/visitas` |
+| **Usuarios Beneficiarios** | Registro de beneficiarios | `/usuarios-beneficiarios` |
+| **Apoyos** | Registro de postes y estructuras | `/apoyos` |
+| **Tramos** | Conexiones entre apoyos | `/tramos` |
+| **Validaciones** | Motor de reglas (3 reglas) | `/validaciones` |
+| **Consolidado** | Cálculo de totales | `/consolidado` |
+| **Informe Técnico** | Generación de reportes | `/informe-tecnico` |
+| **Exportación Excel** | Generación de archivos XLSX | `/exportacion-excel` |
+
+## 🛠️ Configuración del Proyecto
+
+### Requisitos Previos
+- Node.js 18+
+- PostgreSQL 12+
+- npm o yarn
+
+### Instalación de Dependencias
 
 ```bash
-$ npm install
+npm install
 ```
 
-## Compile and run the project
+### Variables de Entorno
 
-```bash
-# development
-$ npm run start
+Crea un archivo `.env` en la raíz del proyecto:
 
-# watch mode
-$ npm run start:dev
+```env
+# Base de datos
+DATABASE_HOST=localhost
+DATABASE_PORT=5432
+DATABASE_USER=postgres
+DATABASE_PASSWORD=tu_password
+DATABASE_NAME=sepe_campo
 
-# production mode
-$ npm run start:prod
+# API
+NODE_ENV=development
+PORT=3000
 ```
 
-## Run tests
+## 🚀 Ejecución
 
+### Desarrollo (con auto-reload)
 ```bash
-# unit tests
+npm run start:dev
+```
+
+### Producción
+```bash
+npm run build
+npm run start:prod
+```
+
+### Pruebas
+```bash
+# Tests unitarios
+npm run test
+
+# Tests E2E
+npm run test:e2e
+
+# Cobertura
+npm run test:cov
+```
+
+## 📚 Documentación de API
+
+Para documentación detallada de todos los endpoints, consulta [API_DOCUMENTATION.md](./API_DOCUMENTATION.md).
+
+### Ejemplos Rápidos
+
+#### 1. Crear una visita
+```bash
+curl -X POST http://localhost:3000/visitas \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contrato": "CONT-2024-001",
+    "vereda": "San Fernando",
+    "municipio": "Bogotá",
+    "tecnico_id": "tech-001",
+    "fecha": "2024-07-15"
+  }'
+```
+
+#### 2. Registrar un apoyo
+```bash
+curl -X POST http://localhost:3000/apoyos \
+  -H "Content-Type: application/json" \
+  -d '{
+    "visita_id": "uuid-de-visita",
+    "numero": 1,
+    "nivel_tension": "BT",
+    "perchas": 2,
+    "templetes_bt": 4,
+    "estructuras": [
+      {"codigo": "EST-001", "cantidad": 2}
+    ]
+  }'
+```
+
+#### 3. Ejecutar validaciones
+```bash
+curl -X POST http://localhost:3000/validaciones/validar/uuid-de-visita
+```
+
+#### 4. Generar informe
+```bash
+curl http://localhost:3000/informe-tecnico/uuid-de-visita
+```
+
+#### 5. Descargar Excel
+```bash
+curl http://localhost:3000/exportacion-excel/descargar/uuid-de-visita \
+  --output informe.xlsx
+```
+
+## 🗂️ Estructura del Proyecto
+
+```
+src/
+├── app.controller.ts          # Controlador principal
+├── app.module.ts              # Módulo raíz
+├── app.service.ts             # Servicio principal
+├── main.ts                    # Punto de entrada
+├── visitas/                   # Módulo de visitas
+│   ├── dto/
+│   ├── entities/
+│   ├── visitas.controller.ts
+│   ├── visitas.module.ts
+│   └── visitas.service.ts
+├── usuarios-beneficiarios/    # Módulo de usuarios
+├── apoyos/                    # Módulo de apoyos (postes)
+├── tramos/                    # Módulo de tramos
+├── validaciones/              # Motor de reglas
+├── consolidado/               # Cálculo de totales
+├── informe-tecnico/           # Generación de informes
+└── exportacion-excel/         # Exportación a Excel
+```
+
+## 🔧 Características Técnicas
+
+### Base de Datos
+- **ORM**: TypeORM
+- **Base de datos**: PostgreSQL
+- **Migraciones**: Automáticas con `synchronize: true`
+
+### Validación
+- **Validadores**: class-validator
+- **Transformadores**: class-transformer
+
+### Exportación
+- **Librería Excel**: xlsx
+- **Formato**: XLSX (Excel 2007+)
+
+### Características de Negocio
+
+#### Motor de Validación (3 Reglas)
+1. ✅ **Transformador sin tierras MT**: Alerta si un apoyo tiene transformador pero no tierras de MT
+2. ✅ **Estructura MT en BT**: Alerta si hay estructuras MT en un nivel BT
+3. ✅ **Usuario sin medidor**: Alerta si un usuario no tiene medidor registrado
+
+#### Cálculo de ACSR
+- Formula: `Total ACSR = Suma(longitud_tramos) × 2 conductores`
+
+#### Consolidado de Cantidades
+- Totales por componente (perchas, templetes, tierras, conectores, transformadores)
+- Totales por nivel de tensión
+- Resumen ejecutivo completo
+
+## 📊 Esquema de Base de Datos
+
+```
+VISITA
+├── USUARIO_BENEFICIARIO (1:N)
+├── APOYO (1:N)
+│   └── ESTRUCTURA_APOYO (1:N)
+├── TRAMO (1:N)
+│   ├── references APOYO (origen)
+│   └── references APOYO (destino)
+└── INCONSISTENCIA (1:N)
+```
+
+## 🔐 Consideraciones de Seguridad
+
+- Las IDs de todos los recursos se generan automáticamente como UUID
+- No se aceptan IDs del cliente
+- Las operaciones son atómicas a nivel de base de datos
+- Validación completa de entrada en todos los endpoints
+- Códigos HTTP apropiados para todos los escenarios
+
+## 📝 Notas Importantes
+
+⚠️ **Estado de Visita**: Una visita NO tiene estado "cerrada". Se puede editar en cualquier momento.
+
+⚠️ **Alertas**: Las inconsistencias detectadas son INFORMATIVAS. No bloquean el guardado de datos.
+
+⚠️ **Datos Faltantes**: Se marcan como "por confirmar", nunca se inventan valores.
+
+⚠️ **Cantidades**: No pueden ser negativas. Deben ser números enteros ≥ 0.
+
+## 🤝 Contribuir
+
+Este proyecto sigue estándares de NestJS y clean architecture.
+
+### Estándares de Código
+- ESLint configurado
+- Prettier para formato
+- TypeScript strict mode
+
+### Lint y Formato
+```bash
+npm run lint           # Verificar
+npm run format         # Formatear automáticamente
+```
+
+## 📄 Licencia
+
+UNLICENSED
+
+## 👨‍💻 Autor
+
+SEPE Campo - Proyecto de Verificación de Obra Eléctrica
+
+---
+
+Para más información, consulta la [Documentación de API](./API_DOCUMENTATION.md).
+
 $ npm run test
 
 # e2e tests
