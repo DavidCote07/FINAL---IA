@@ -148,3 +148,12 @@ export const exportacionApi = {
     document.body.removeChild(link);
   },
 };
+
+// ===== AUTH =====
+export const authApi = {
+  login: async (data: { username: string; password: string }) =>
+    apiCall('/auth/login', { method: 'POST', body: JSON.stringify(data) }),
+  register: async (data: { username: string; password: string }) =>
+    apiCall('/auth/register', { method: 'POST', body: JSON.stringify(data) }),
+};
+
