@@ -12,7 +12,9 @@ import { JwtStrategy } from './jwt.strategy';
     PassportModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'dev_jwt_secret',
-      signOptions: { expiresIn: process.env.JWT_EXPIRES_IN || '3600s' },
+      // `process.env.JWT_EXPIRES_IN` can be undefined or a string; cast to any
+      // to satisfy the TypeScript signature for SignOptions.expiresIn.
+      signOptions: { expiresIn: (process.env.JWT_EXPIRES_IN || '3600s') as any },
     }),
   ],
   providers: [AuthService, JwtStrategy],

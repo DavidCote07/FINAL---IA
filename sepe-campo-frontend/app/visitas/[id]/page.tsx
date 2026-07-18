@@ -10,7 +10,7 @@ import {
   validacionesApi,
   informeApi,
   exportacionApi,
-} from '@/lib/api/client';
+} from '../../../src/lib/api/client';
 import {
   Visita,
   UsuarioBeneficiario,
@@ -18,11 +18,11 @@ import {
   Tramo,
   Inconsistencia,
   InformeTecnico,
-} from '@/types';
-import { Layout } from '@/components/layout';
-import { FormField, Form } from '@/components/forms/FormFields';
+} from '../../../src/types';
+import { Layout } from '../../../src/components/layout';
+import { FormField, Form } from '../../../src/components/forms/FormFields';
 
-export default function DetalleVisitaPage() {
+export default function Page() {
   const params = useParams();
   const visitaId = params.id as string;
 
@@ -31,9 +31,8 @@ export default function DetalleVisitaPage() {
   const [apoyos, setApoyos] = useState<Apoyo[]>([]);
   const [tramos, setTramos] = useState<Tramo[]>([]);
   const [inconsistencias, setInconsistencias] = useState<Inconsistencia[]>([]);
-  const [informe, setInfore] = useState<InformeTecnico | null>(null);
+  const [informe, setInforme] = useState<InformeTecnico | null>(null);
   const [loading, setLoading] = useState(true);
-  const [loadingInconsistencias, setLoadingInconsistencias] = useState(false);
   const [activeTab, setActiveTab] = useState<'general' | 'usuarios' | 'apoyos' | 'tramos' | 'validaciones' | 'informe'>('general');
 
   const [usuarioForm, setUsuarioForm] = useState({
@@ -57,24 +56,9 @@ export default function DetalleVisitaPage() {
     transformador: false,
   });
 
-  const [tramoForm, setTramoForm] = useState({
-    apoyo_origen_id: '',
-    apoyo_destino_id: '',
-    nivel_tension: 'BT',
-    longitud_ml: 0,
-  });
-
   useEffect(() => {
     loadData();
   }, [visitaId]);
-
-  useEffect(() => {
-    if (activeTab !== 'validaciones' || !visitaId) {
-      return;
-    }
-
-    void cargarInconsistencias();
-  }, [activeTab, visitaId]);
 
   const loadData = async () => {
     try {
@@ -86,10 +70,10 @@ export default function DetalleVisitaPage() {
         tramosApi.getByVisita(visitaId),
       ]);
 
-      setVisita(visitaData as Visita);
-      setUsuarios(usuariosData as UsuarioBeneficiario[]);
-      setApoyos(apoyosData as Apoyo[]);
-      setTramos(tramosData as Tramo[]);
+      setVisita(visitaData);
+      setUsuarios(usuariosData);
+      setApoyos(apoyosData);
+      setTramos(tramosData);
     } catch (err) {
       console.error('Error loading data:', err);
     } finally {
@@ -97,34 +81,11 @@ export default function DetalleVisitaPage() {
     }
   };
 
-  const cargarInconsistencias = async () => {
-    if (!visitaId) {
-      return;
-    }
-
-    try {
-      setLoadingInconsistencias(true);
-      const response = (await validacionesApi.getInconsistencias(visitaId)) as
-        | Inconsistencia[]
-        | { inconsistencias?: Inconsistencia[] }
-        | null;
-      const lista = Array.isArray(response)
-        ? response
-        : response?.inconsistencias || [];
-      setInconsistencias(lista);
-    } catch (err) {
-      console.error('Error loading inconsistencias:', err);
-      setInconsistencias([]);
-    } finally {
-      setLoadingInconsistencias(false);
-    }
-  };
-
   const handleValidar = async () => {
     try {
-      await validacionesApi.validar(visitaId);
+      const result = await validacionesApi.validar(visitaId);
+      setInconsistencias(result.inconsistencias);
       setActiveTab('validaciones');
-      await cargarInconsistencias();
     } catch (err) {
       console.error('Error validating:', err);
     }
@@ -132,8 +93,8 @@ export default function DetalleVisitaPage() {
 
   const handleVerInforme = async () => {
     try {
-      const result = (await informeApi.getCompleto(visitaId)) as InformeTecnico;
-      setInfore(result);
+      const result = await informeApi.getCompleto(visitaId);
+      setInforme(result);
       setActiveTab('informe');
     } catch (err) {
       console.error('Error loading informe:', err);
@@ -190,35 +151,6 @@ export default function DetalleVisitaPage() {
       await loadData();
     } catch (err) {
       console.error('Error adding apoyo:', err);
-    }
-  };
-
-  const handleAgregarTramo = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      if (!tramoForm.apoyo_origen_id || !tramoForm.apoyo_destino_id) {
-        throw new Error('Selecciona ambos apoyos para crear el tramo');
-      }
-
-      if (tramoForm.apoyo_origen_id === tramoForm.apoyo_destino_id) {
-        throw new Error('El apoyo origen y destino deben ser distintos');
-      }
-
-      await tramosApi.create({
-        visita_id: visitaId,
-        ...tramoForm,
-        longitud_ml: Number(tramoForm.longitud_ml),
-      });
-
-      setTramoForm({
-        apoyo_origen_id: '',
-        apoyo_destino_id: '',
-        nivel_tension: 'BT',
-        longitud_ml: 0,
-      });
-      await loadData();
-    } catch (err) {
-      console.error('Error adding tramo:', err);
     }
   };
 
@@ -291,7 +223,7 @@ export default function DetalleVisitaPage() {
               {tab === 'validaciones' && '⚠️ Validaciones'}
               {tab === 'informe' && '📄 Informe'}
             </button>
-          )
+          ),
         )}
       </div>
 
@@ -467,63 +399,9 @@ export default function DetalleVisitaPage() {
         {activeTab === 'tramos' && (
           <div>
             <h3 className="text-2xl font-bold mb-4">Tramos</h3>
-
-            <form onSubmit={handleAgregarTramo} className="bg-white rounded-lg shadow-md p-6 mb-6">
-              <h4 className="text-lg font-semibold mb-4 text-gray-700">Nuevo Tramo</h4>
-              <FormField
-                label="Apoyo Origen"
-                name="apoyo_origen_id"
-                type="select"
-                value={tramoForm.apoyo_origen_id}
-                options={apoyos.map((apoyo) => ({
-                  value: apoyo.id,
-                  label: `Apoyo ${apoyo.numero} (${apoyo.nivel_tension})`,
-                }))}
-                onChange={(e) => setTramoForm({ ...tramoForm, apoyo_origen_id: e.target.value })}
-              />
-              <FormField
-                label="Apoyo Destino"
-                name="apoyo_destino_id"
-                type="select"
-                value={tramoForm.apoyo_destino_id}
-                options={apoyos.map((apoyo) => ({
-                  value: apoyo.id,
-                  label: `Apoyo ${apoyo.numero} (${apoyo.nivel_tension})`,
-                }))}
-                onChange={(e) => setTramoForm({ ...tramoForm, apoyo_destino_id: e.target.value })}
-              />
-              <FormField
-                label="Tipo de Conductor"
-                name="nivel_tension"
-                type="select"
-                value={tramoForm.nivel_tension}
-                options={[
-                  { value: 'BT', label: 'BT' },
-                  { value: 'MT', label: 'MT' },
-                ]}
-                onChange={(e) => setTramoForm({ ...tramoForm, nivel_tension: e.target.value })}
-              />
-              <FormField
-                label="Longitud"
-                name="longitud_ml"
-                type="number"
-                value={tramoForm.longitud_ml}
-                onChange={(e) => setTramoForm({ ...tramoForm, longitud_ml: parseInt(e.target.value) || 0 })}
-              />
-              <button
-                type="submit"
-                className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 font-semibold"
-              >
-                Guardar
-              </button>
-            </form>
-
-            <div className="space-y-4">
-              <h4 className="text-lg font-semibold mb-4">Tramos Registrados</h4>
-              <p className="text-gray-600">
-                {tramos.length === 0 ? 'No hay tramos registrados' : 'Tramos registrados'}
-              </p>
-
+            {tramos.length === 0 ? (
+              <p className="text-gray-600">No hay tramos registrados</p>
+            ) : (
               <div className="space-y-4">
                 {tramos.map((tramo) => (
                   <div key={tramo.id} className="p-4 border border-gray-200 rounded">
@@ -536,17 +414,15 @@ export default function DetalleVisitaPage() {
                   </div>
                 ))}
               </div>
-            </div>
+            )}
           </div>
         )}
 
         {activeTab === 'validaciones' && (
           <div>
             <h3 className="text-2xl font-bold mb-4">Inconsistencias Detectadas</h3>
-            {loadingInconsistencias ? (
-              <p className="text-gray-600">Cargando advertencias...</p>
-            ) : inconsistencias.length === 0 ? (
-              <p className="text-gray-600">No hay advertencias registradas para esta visita.</p>
+            {inconsistencias.length === 0 ? (
+              <p className="text-green-600 font-semibold">✓ No hay inconsistencias</p>
             ) : (
               <div className="space-y-4">
                 {inconsistencias.map((inc) => (
@@ -555,18 +431,11 @@ export default function DetalleVisitaPage() {
                     className={`p-4 border rounded ${
                       inc.severidad === 'WARNING'
                         ? 'border-yellow-400 bg-yellow-50'
-                        : inc.severidad === 'ERROR'
-                          ? 'border-red-400 bg-red-50'
-                          : 'border-blue-400 bg-blue-50'
+                        : 'border-blue-400 bg-blue-50'
                     }`}
                   >
-                    <div className="flex items-center justify-between gap-2 mb-2">
-                      <p className="font-semibold">{inc.descripcion}</p>
-                      <span className="text-xs font-semibold uppercase tracking-wide text-gray-700">
-                        {inc.severidad || 'INFO'}
-                      </span>
-                    </div>
-                    <p className="text-sm text-gray-700">{inc.mensaje}</p>
+                    <p className="font-semibold">{inc.descripcion}</p>
+                    <p className="text-sm text-gray-600">{inc.mensaje}</p>
                     <p className="text-xs text-gray-500 mt-2">Regla {inc.numero_regla}</p>
                   </div>
                 ))}
