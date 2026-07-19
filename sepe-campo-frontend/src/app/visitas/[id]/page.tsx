@@ -62,6 +62,7 @@ export default function DetalleVisitaPage() {
     apoyo_destino_id: '',
     nivel_tension: 'BT',
     longitud_ml: 0,
+    observaciones: '',
   });
 
   useEffect(() => {
@@ -171,10 +172,29 @@ export default function DetalleVisitaPage() {
   const handleAgregarApoyo = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await apoyosApi.create({
-        visita_id: visitaId,
-        ...apoyoForm,
+      if (!apoyoForm.numero) {
+        throw new Error('El número de apoyo no puede estar vacío.');
+      }
+
+      const response = await fetch('http://localhost:3001/apoyos', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          visita_id: visitaId,
+          numero: apoyoForm.numero,
+          tipo_material: apoyoForm.tipo_poste,
+          nivel_tension: apoyoForm.nivel_tension,
+          transformador: apoyoForm.transformador,
+        }),
       });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Error adding apoyo: ${response.status} ${errorText}`);
+      }
+
       setApoyoForm({
         numero: apoyos.length + 1,
         nivel_tension: 'BT',
@@ -215,6 +235,7 @@ export default function DetalleVisitaPage() {
         apoyo_destino_id: '',
         nivel_tension: 'BT',
         longitud_ml: 0,
+        observaciones: '',
       });
       await loadData();
     } catch (err) {
@@ -470,72 +491,109 @@ export default function DetalleVisitaPage() {
 
             <form onSubmit={handleAgregarTramo} className="bg-white rounded-lg shadow-md p-6 mb-6">
               <h4 className="text-lg font-semibold mb-4 text-gray-700">Nuevo Tramo</h4>
-              <FormField
-                label="Apoyo Origen"
-                name="apoyo_origen_id"
-                type="select"
-                value={tramoForm.apoyo_origen_id}
-                options={apoyos.map((apoyo) => ({
-                  value: apoyo.id,
-                  label: `Apoyo ${apoyo.numero} (${apoyo.nivel_tension})`,
-                }))}
-                onChange={(e) => setTramoForm({ ...tramoForm, apoyo_origen_id: e.target.value })}
-              />
-              <FormField
-                label="Apoyo Destino"
-                name="apoyo_destino_id"
-                type="select"
-                value={tramoForm.apoyo_destino_id}
-                options={apoyos.map((apoyo) => ({
-                  value: apoyo.id,
-                  label: `Apoyo ${apoyo.numero} (${apoyo.nivel_tension})`,
-                }))}
-                onChange={(e) => setTramoForm({ ...tramoForm, apoyo_destino_id: e.target.value })}
-              />
-              <FormField
-                label="Tipo de Conductor"
-                name="nivel_tension"
-                type="select"
-                value={tramoForm.nivel_tension}
-                options={[
-                  { value: 'BT', label: 'BT' },
-                  { value: 'MT', label: 'MT' },
-                ]}
-                onChange={(e) => setTramoForm({ ...tramoForm, nivel_tension: e.target.value })}
-              />
-              <FormField
-                label="Longitud"
-                name="longitud_ml"
-                type="number"
-                value={tramoForm.longitud_ml}
-                onChange={(e) => setTramoForm({ ...tramoForm, longitud_ml: parseInt(e.target.value) || 0 })}
-              />
-              <button
-                type="submit"
-                className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 font-semibold"
-              >
-                Guardar
-              </button>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Apoyo Origen</label>
+                  <select
+                    name="apoyo_origen_id"
+                    value={tramoForm.apoyo_origen_id}
+                    onChange={(e) => setTramoForm({ ...tramoForm, apoyo_origen_id: e.target.value })}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  >
+                    <option value="">-- Selecciona apoyo origen --</option>
+                    {apoyos.map((apoyo) => (
+                      <option key={apoyo.id} value={apoyo.id}>
+                        {`Apoyo ${apoyo.numero} (${apoyo.nivel_tension})`}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Apoyo Destino</label>
+                  <select
+                    name="apoyo_destino_id"
+                    value={tramoForm.apoyo_destino_id}
+                    onChange={(e) => setTramoForm({ ...tramoForm, apoyo_destino_id: e.target.value })}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  >
+                    <option value="">-- Selecciona apoyo destino --</option>
+                    {apoyos.map((apoyo) => (
+                      <option key={apoyo.id} value={apoyo.id}>
+                        {`Apoyo ${apoyo.numero} (${apoyo.nivel_tension})`}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Nivel de Tensión</label>
+                  <select
+                    name="nivel_tension"
+                    value={tramoForm.nivel_tension}
+                    onChange={(e) => setTramoForm({ ...tramoForm, nivel_tension: e.target.value })}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  >
+                    <option value="BT">BT</option>
+                    <option value="MT">MT</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Longitud (m)</label>
+                  <input
+                    name="longitud_ml"
+                    type="number"
+                    value={tramoForm.longitud_ml}
+                    onChange={(e) => setTramoForm({ ...tramoForm, longitud_ml: parseInt(e.target.value) || 0 })}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Observaciones</label>
+                <textarea
+                  name="observaciones"
+                  value={tramoForm.observaciones}
+                  onChange={(e) => setTramoForm({ ...tramoForm, observaciones: e.target.value })}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 h-24"
+                />
+              </div>
+
+              <div className="mt-6">
+                <button
+                  type="submit"
+                  className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 font-semibold"
+                >
+                  Guardar
+                </button>
+              </div>
             </form>
 
             <div className="space-y-4">
               <h4 className="text-lg font-semibold mb-4">Tramos Registrados</h4>
-              <p className="text-gray-600">
-                {tramos.length === 0 ? 'No hay tramos registrados' : 'Tramos registrados'}
-              </p>
 
-              <div className="space-y-4">
-                {tramos.map((tramo) => (
-                  <div key={tramo.id} className="p-4 border border-gray-200 rounded">
-                    <p className="font-semibold">
-                      Apoyo {tramo.apoyo_origen?.numero} → Apoyo {tramo.apoyo_destino?.numero}
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      Longitud: {tramo.longitud_ml} ml | Tensión: {tramo.nivel_tension}
-                    </p>
-                  </div>
-                ))}
-              </div>
+              {tramos.length === 0 ? (
+                <p className="text-gray-600">No hay tramos registrados</p>
+              ) : (
+                <div className="space-y-4">
+                  {tramos.map((tramo) => (
+                    <div key={tramo.id} className="p-4 border border-gray-200 rounded">
+                      <p className="font-semibold">
+                        Apoyo {tramo.apoyo_origen?.numero} → Apoyo {tramo.apoyo_destino?.numero}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        Longitud: {tramo.longitud_ml} ml | Tensión: {tramo.nivel_tension}
+                      </p>
+                      {tramo.observaciones && (
+                        <p className="text-sm text-gray-600 mt-2">Observaciones: {tramo.observaciones}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}

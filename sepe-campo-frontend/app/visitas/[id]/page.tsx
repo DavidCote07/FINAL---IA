@@ -56,6 +56,48 @@ export default function Page() {
     transformador: false,
   });
 
+  const [tramoForm, setTramoForm] = useState({
+    apoyo_origen_id: '',
+    apoyo_destino_id: '',
+    nivel_tension: 'BT',
+    longitud_ml: '',
+    observaciones: '',
+  });
+
+  const [observacionesInforme, setObservacionesInforme] = useState('');
+
+  const handleAgregarTramo = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      if (!tramoForm.apoyo_origen_id || !tramoForm.apoyo_destino_id) {
+        throw new Error('Selecciona ambos apoyos');
+      }
+
+      if (tramoForm.apoyo_origen_id === tramoForm.apoyo_destino_id) {
+        throw new Error('El apoyo origen y destino deben ser distintos');
+      }
+
+      await tramosApi.create({
+        visita_id: visitaId,
+        ...tramoForm,
+        longitud_ml: Number(tramoForm.longitud_ml),
+      });
+
+      setTramoForm({
+        apoyo_origen_id: '',
+        apoyo_destino_id: '',
+        nivel_tension: 'BT',
+        longitud_ml: '',
+        observaciones: '',
+      });
+
+      await loadData();
+    } catch (err) {
+      console.error('Error adding tramo:', err);
+    }
+  };
+
   useEffect(() => {
     loadData();
   }, [visitaId]);
@@ -68,7 +110,7 @@ export default function Page() {
         usuariosApi.getByVisita(visitaId),
         apoyosApi.getByVisita(visitaId),
         tramosApi.getByVisita(visitaId),
-      ]);
+      ]) as [Visita, UsuarioBeneficiario[], Apoyo[], Tramo[]];
 
       setVisita(visitaData);
       setUsuarios(usuariosData);
@@ -83,7 +125,7 @@ export default function Page() {
 
   const handleValidar = async () => {
     try {
-      const result = await validacionesApi.validar(visitaId);
+      const result = (await validacionesApi.validar(visitaId)) as { inconsistencias: Inconsistencia[] };
       setInconsistencias(result.inconsistencias);
       setActiveTab('validaciones');
     } catch (err) {
@@ -93,7 +135,7 @@ export default function Page() {
 
   const handleVerInforme = async () => {
     try {
-      const result = await informeApi.getCompleto(visitaId);
+      const result = (await informeApi.getCompleto(visitaId)) as InformeTecnico;
       setInforme(result);
       setActiveTab('informe');
     } catch (err) {
@@ -153,6 +195,10 @@ export default function Page() {
       console.error('Error adding apoyo:', err);
     }
   };
+
+  const tramosConInconsistencias = tramos.filter(
+    (tramo) => tramo.nivel_tension === 'BT' && Number(tramo.longitud_ml) > 45,
+  );
 
   if (loading) {
     return (
@@ -399,71 +445,165 @@ export default function Page() {
         {activeTab === 'tramos' && (
           <div>
             <h3 className="text-2xl font-bold mb-4">Tramos</h3>
-            {tramos.length === 0 ? (
-              <p className="text-gray-600">No hay tramos registrados</p>
-            ) : (
-              <div className="space-y-4">
-                {tramos.map((tramo) => (
-                  <div key={tramo.id} className="p-4 border border-gray-200 rounded">
-                    <p className="font-semibold">
-                      Apoyo {tramo.apoyo_origen?.numero} → Apoyo {tramo.apoyo_destino?.numero}
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      Longitud: {tramo.longitud_ml} ml | Tensión: {tramo.nivel_tension}
-                    </p>
-                  </div>
-                ))}
+
+            <form onSubmit={handleAgregarTramo} className="bg-white rounded-lg shadow-md p-6 mb-6">
+              <h4 className="text-lg font-semibold mb-4 text-gray-700">Nuevo Tramo</h4>
+
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <label className="block">
+                  <span className="text-sm font-medium text-gray-700">Apoyo Origen</span>
+                  <select
+                    value={tramoForm.apoyo_origen_id}
+                    onChange={(e) => setTramoForm({ ...tramoForm, apoyo_origen_id: e.target.value })}
+                    className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  >
+                    <option value="">Selecciona apoyo origen</option>
+                    {apoyos.map((apoyo) => (
+                      <option key={apoyo.id} value={apoyo.id}>
+                        {`Apoyo ${apoyo.numero} (${apoyo.nivel_tension})`}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className="block">
+                  <span className="text-sm font-medium text-gray-700">Apoyo Destino</span>
+                  <select
+                    value={tramoForm.apoyo_destino_id}
+                    onChange={(e) => setTramoForm({ ...tramoForm, apoyo_destino_id: e.target.value })}
+                    className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  >
+                    <option value="">Selecciona apoyo destino</option>
+                    {apoyos.map((apoyo) => (
+                      <option key={apoyo.id} value={apoyo.id}>
+                        {`Apoyo ${apoyo.numero} (${apoyo.nivel_tension})`}
+                      </option>
+                    ))}
+                  </select>
+                </label>
               </div>
-            )}
+
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3 mt-4">
+                <label className="block">
+                  <span className="text-sm font-medium text-gray-700">Nivel de Tensión</span>
+                  <select
+                    value={tramoForm.nivel_tension}
+                    onChange={(e) => setTramoForm({ ...tramoForm, nivel_tension: e.target.value })}
+                    className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  >
+                    <option value="BT">BT</option>
+                    <option value="MT">MT</option>
+                  </select>
+                </label>
+
+                <label className="block">
+                  <span className="text-sm font-medium text-gray-700">Longitud (m)</span>
+                  <input
+                    type="number"
+                    value={tramoForm.longitud_ml}
+                    onChange={(e) => setTramoForm({ ...tramoForm, longitud_ml: e.target.value })}
+                    className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  />
+                </label>
+
+                <label className="block">
+                  <span className="text-sm font-medium text-gray-700">Observaciones</span>
+                  <input
+                    type="text"
+                    value={tramoForm.observaciones}
+                    onChange={(e) => setTramoForm({ ...tramoForm, observaciones: e.target.value })}
+                    className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  />
+                </label>
+              </div>
+
+              <div className="mt-6">
+                <button
+                  type="submit"
+                  className="w-full rounded-md bg-blue-600 px-4 py-2 text-white shadow hover:bg-blue-700"
+                >
+                  Guardar Tramo
+                </button>
+              </div>
+            </form>
+
+            <div className="space-y-4">
+              <h4 className="text-lg font-semibold mb-4">Tramos Registrados</h4>
+              {tramos.length === 0 ? (
+                <p className="text-gray-600">No hay tramos registrados</p>
+              ) : (
+                <div className="space-y-4">
+                  {tramos.map((tramo) => (
+                    <div key={tramo.id} className="p-4 border border-gray-200 rounded">
+                      <p className="font-semibold">
+                        Apoyo {tramo.apoyo_origen?.numero} → Apoyo {tramo.apoyo_destino?.numero}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        Longitud: {tramo.longitud_ml} ml | Tensión: {tramo.nivel_tension}
+                      </p>
+                      {tramo.observaciones && (
+                        <p className="text-sm text-gray-600 mt-2">Observaciones: {tramo.observaciones}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
 
         {activeTab === 'validaciones' && (
           <div>
             <h3 className="text-2xl font-bold mb-4">Inconsistencias Detectadas</h3>
-            {inconsistencias.length === 0 ? (
-              <p className="text-green-600 font-semibold">✓ No hay inconsistencias</p>
-            ) : (
+            {tramosConInconsistencias.length > 0 ? (
               <div className="space-y-4">
-                {inconsistencias.map((inc) => (
+                {tramosConInconsistencias.map((tramo) => (
                   <div
-                    key={inc.id}
-                    className={`p-4 border rounded ${
-                      inc.severidad === 'WARNING'
-                        ? 'border-yellow-400 bg-yellow-50'
-                        : 'border-blue-400 bg-blue-50'
-                    }`}
+                    key={tramo.id}
+                    className="p-4 border border-red-400 bg-yellow-50 rounded"
                   >
-                    <p className="font-semibold">{inc.descripcion}</p>
-                    <p className="text-sm text-gray-600">{inc.mensaje}</p>
-                    <p className="text-xs text-gray-500 mt-2">Regla {inc.numero_regla}</p>
+                    <p className="font-semibold text-red-700">
+                      Inconsistencia: Tramo {tramo.apoyo_origen?.numero} → Apoyo {tramo.apoyo_destino?.numero} excede la distancia máxima permitida para BT (45m).
+                    </p>
+                    <p className="text-sm text-red-700 mt-2">
+                      Longitud registrada: {tramo.longitud_ml}m
+                    </p>
                   </div>
                 ))}
               </div>
+            ) : (
+              <p className="text-green-600 font-semibold">✓ No hay inconsistencias</p>
             )}
           </div>
         )}
 
-        {activeTab === 'informe' && informe && (
+        {activeTab === 'informe' && (
           <div>
-            <h3 className="text-2xl font-bold mb-4">📄 Informe Técnico</h3>
-            <div className="grid grid-cols-4 gap-4 mb-8">
-              <div className="bg-blue-50 p-4 rounded">
-                <p className="text-gray-600 text-sm">Apoyos</p>
-                <p className="text-3xl font-bold text-blue-600">{informe.resumen_ejecutivo.total_apoyos}</p>
+            <h3 className="text-3xl font-bold mb-6">Resumen del Informe Técnico</h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-6 shadow-sm">
+                <p className="text-sm text-slate-500 mb-2">Total de Apoyos Registrados</p>
+                <p className="text-4xl font-bold text-slate-900">{apoyos.length}</p>
               </div>
-              <div className="bg-green-50 p-4 rounded">
-                <p className="text-gray-600 text-sm">Usuarios</p>
-                <p className="text-3xl font-bold text-green-600">{informe.resumen_ejecutivo.total_usuarios}</p>
+              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-6 shadow-sm">
+                <p className="text-sm text-slate-500 mb-2">Total de Tramos Conectados</p>
+                <p className="text-4xl font-bold text-slate-900">{tramos.length}</p>
               </div>
-              <div className="bg-purple-50 p-4 rounded">
-                <p className="text-gray-600 text-sm">Tramos</p>
-                <p className="text-3xl font-bold text-purple-600">{informe.resumen_ejecutivo.total_tramos}</p>
+              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-6 shadow-sm">
+                <p className="text-sm text-slate-500 mb-2">Alertas Técnicas Detectadas</p>
+                <p className="text-4xl font-bold text-slate-900">{tramosConInconsistencias.length}</p>
               </div>
-              <div className="bg-orange-50 p-4 rounded">
-                <p className="text-gray-600 text-sm">ACSR Total (ml)</p>
-                <p className="text-3xl font-bold text-orange-600">{informe.resumen_ejecutivo.total_acsr}</p>
-              </div>
+            </div>
+
+            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+              <h4 className="text-lg font-semibold text-slate-900 mb-3">Observaciones Generales</h4>
+              <textarea
+                value={observacionesInforme}
+                onChange={(e) => setObservacionesInforme(e.target.value)}
+                placeholder="Escribe aquí las observaciones del inspector..."
+                className="w-full min-h-[160px] rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+              />
             </div>
           </div>
         )}

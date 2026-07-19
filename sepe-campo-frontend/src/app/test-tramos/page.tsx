@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useEffect, useState } from 'react';
 
@@ -8,7 +8,7 @@ type Apoyo = {
   nivel_tension: string;
 };
 
-export default function VisitasPage() {
+export default function TestTramosPage() {
   const [apoyos, setApoyos] = useState<Apoyo[]>([]);
   const [origenId, setOrigenId] = useState('');
   const [destinoId, setDestinoId] = useState('');
