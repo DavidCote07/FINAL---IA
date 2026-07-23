@@ -7,27 +7,36 @@ async function apiCall<T = any>(
   options?: RequestInit
 ): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
-  
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...options?.headers,
-    },
-  });
 
-  if (!response.ok) {
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...options?.headers,
+      },
+    });
+
+    if (!response.ok) {
+      const contentType = response.headers.get('content-type') || '';
+      const errorData = contentType.includes('application/json')
+        ? await response.json().catch(() => ({}))
+        : { message: await response.text().catch(() => response.statusText) };
+
+      throw new Error(errorData?.message || `API Error: ${response.statusText}`);
+    }
+
     const contentType = response.headers.get('content-type') || '';
-    const errorData = contentType.includes('application/json')
-      ? await response.json().catch(() => ({}))
-      : { message: await response.text().catch(() => response.statusText) };
+    if (contentType.includes('application/json')) {
+      return response.json();
+    }
 
-    throw new Error(
-      errorData?.message || `API Error: ${response.statusText}`,
-    );
+    return response.text() as unknown as T;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    console.error(`API call failed for ${url}:`, message);
+    throw new Error(`No se pudo conectar con la API: ${message}`);
   }
-
-  return response.json();
 }
 
 // ===== VISITAS =====

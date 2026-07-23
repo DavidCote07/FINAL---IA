@@ -18,6 +18,10 @@ export class CreateApoyoDto {
   @IsOptional()
   tipo_poste?: string;
 
+  @IsString()
+  @IsOptional()
+  codigo?: string;
+
   @IsNumber()
   @Min(0)
   @IsOptional()

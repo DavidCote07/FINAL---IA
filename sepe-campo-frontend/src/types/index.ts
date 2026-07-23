@@ -52,6 +52,7 @@ export interface Apoyo {
   numero: number;
   nivel_tension: string;
   tipo_poste?: string;
+  codigo?: string;
   perchas: number;
   templetes_bt: number;
   templetes_mt: number;

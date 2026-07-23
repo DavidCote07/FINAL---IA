@@ -32,6 +32,9 @@ export class Apoyo {
   @Column({ length: 100, nullable: true })
   tipo_poste: string;
 
+  @Column({ length: 50, nullable: true })
+  codigo: string;
+
   @Column({ type: 'int', default: 0 })
   perchas: number;
 

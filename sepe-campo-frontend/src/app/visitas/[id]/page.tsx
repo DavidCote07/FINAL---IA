@@ -48,6 +48,7 @@ export default function DetalleVisitaPage() {
     numero: 1,
     nivel_tension: 'BT',
     tipo_poste: '',
+    codigo: '',
     perchas: 0,
     templetes_bt: 0,
     templetes_mt: 0,
@@ -176,29 +177,26 @@ export default function DetalleVisitaPage() {
         throw new Error('El número de apoyo no puede estar vacío.');
       }
 
-      const response = await fetch('http://localhost:3001/apoyos', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          visita_id: visitaId,
-          numero: apoyoForm.numero,
-          tipo_material: apoyoForm.tipo_poste,
-          nivel_tension: apoyoForm.nivel_tension,
-          transformador: apoyoForm.transformador,
-        }),
+      await apoyosApi.create({
+        visita_id: visitaId,
+        numero: apoyoForm.numero,
+        nivel_tension: apoyoForm.nivel_tension,
+        tipo_poste: apoyoForm.tipo_poste || undefined,
+        codigo: apoyoForm.codigo || undefined,
+        perchas: apoyoForm.perchas,
+        templetes_bt: apoyoForm.templetes_bt,
+        templetes_mt: apoyoForm.templetes_mt,
+        tierras_bt: apoyoForm.tierras_bt,
+        tierras_mt: apoyoForm.tierras_mt,
+        conectores: apoyoForm.conectores,
+        transformador: apoyoForm.transformador,
       });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Error adding apoyo: ${response.status} ${errorText}`);
-      }
 
       setApoyoForm({
         numero: apoyos.length + 1,
         nivel_tension: 'BT',
         tipo_poste: '',
+        codigo: '',
         perchas: 0,
         templetes_bt: 0,
         templetes_mt: 0,
@@ -435,6 +433,13 @@ export default function DetalleVisitaPage() {
                 value={apoyoForm.tipo_poste}
                 onChange={(e) => setApoyoForm({ ...apoyoForm, tipo_poste: e.target.value })}
               />
+              <FormField
+                label="Código del Apoyo"
+                name="codigo"
+                placeholder="AP-001"
+                value={apoyoForm.codigo}
+                onChange={(e) => setApoyoForm({ ...apoyoForm, codigo: e.target.value })}
+              />
               <div className="grid grid-cols-2 gap-4">
                 <FormField
                   label="Perchas"
@@ -464,7 +469,29 @@ export default function DetalleVisitaPage() {
                   value={apoyoForm.tierras_bt}
                   onChange={(e) => setApoyoForm({ ...apoyoForm, tierras_bt: parseInt(e.target.value) })}
                 />
+                <FormField
+                  label="Tierras MT"
+                  name="tierras_mt"
+                  type="number"
+                  value={apoyoForm.tierras_mt}
+                  onChange={(e) => setApoyoForm({ ...apoyoForm, tierras_mt: parseInt(e.target.value) })}
+                />
+                <FormField
+                  label="Conectores"
+                  name="conectores"
+                  type="number"
+                  value={apoyoForm.conectores}
+                  onChange={(e) => setApoyoForm({ ...apoyoForm, conectores: parseInt(e.target.value) })}
+                />
               </div>
+              <label className="flex items-center gap-2 mt-4 mb-2 text-sm text-gray-700">
+                <input
+                  type="checkbox"
+                  checked={apoyoForm.transformador}
+                  onChange={(e) => setApoyoForm({ ...apoyoForm, transformador: e.target.checked })}
+                />
+                Tiene transformador
+              </label>
             </Form>
 
             <h4 className="text-lg font-semibold mt-8 mb-4">Apoyos Registrados</h4>
@@ -475,6 +502,9 @@ export default function DetalleVisitaPage() {
                 {apoyos.map((apoyo) => (
                   <div key={apoyo.id} className="p-4 border border-gray-200 rounded">
                     <p className="font-semibold">Apoyo {apoyo.numero} - {apoyo.nivel_tension}</p>
+                    <p className="text-sm text-gray-500">
+                      {apoyo.codigo ? `Código: ${apoyo.codigo}` : 'Código: sin asignar'}
+                    </p>
                     <p className="text-sm text-gray-600">
                       Perchas: {apoyo.perchas} | Templetes BT: {apoyo.templetes_bt} | Templetes MT: {apoyo.templetes_mt}
                     </p>
