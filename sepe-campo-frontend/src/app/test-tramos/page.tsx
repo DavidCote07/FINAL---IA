@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useEffect, useState } from 'react';
 import { Layout } from '@/components/layout';
@@ -9,7 +9,7 @@ type Apoyo = {
   nivel_tension: string;
 };
 
-export default function VisitasPage() {
+export default function TestTramosPage() {
   const [apoyos, setApoyos] = useState<Apoyo[]>([]);
   const [origenId, setOrigenId] = useState('');
   const [destinoId, setDestinoId] = useState('');
@@ -92,9 +92,9 @@ export default function VisitasPage() {
           ) : null}
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <label className="block">
-                <span className="text-sm font-medium text-slate-700">Apoyo Origen</span>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <label className="block">
+              <span className="text-sm font-medium text-slate-700">Apoyo Origen</span>
               <select
                 value={origenId}
                 onChange={(e) => setOrigenId(e.target.value)}

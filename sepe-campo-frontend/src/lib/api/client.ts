@@ -1,8 +1,8 @@
 // Configuración de la API
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 // Cliente HTTP genérico
-async function apiCall<T>(
+async function apiCall<T = any>(
   endpoint: string,
   options?: RequestInit
 ): Promise<T> {
@@ -17,8 +17,14 @@ async function apiCall<T>(
   });
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
-    throw new Error(error.message || `API Error: ${response.statusText}`);
+    const contentType = response.headers.get('content-type') || '';
+    const errorData = contentType.includes('application/json')
+      ? await response.json().catch(() => ({}))
+      : { message: await response.text().catch(() => response.statusText) };
+
+    throw new Error(
+      errorData?.message || `API Error: ${response.statusText}`,
+    );
   }
 
   return response.json();
@@ -148,3 +154,12 @@ export const exportacionApi = {
     document.body.removeChild(link);
   },
 };
+
+// ===== AUTH =====
+export const authApi = {
+  login: async (data: { username: string; password: string }) =>
+    apiCall('/auth/login', { method: 'POST', body: JSON.stringify(data) }),
+  register: async (data: { username: string; password: string }) =>
+    apiCall('/auth/register', { method: 'POST', body: JSON.stringify(data) }),
+};
+

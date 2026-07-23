@@ -4,6 +4,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { VisitasModule } from './visitas/visitas.module';
+import { UsersModule } from './users/users.module';
+import { AuthModule } from './auth/auth.module';
 import { UsuariosBeneficiariosModule } from './usuarios-beneficiarios/usuarios-beneficiarios.module';
 import { ApoyosModule } from './apoyos/apoyos.module';
 import { TramosModule } from './tramos/tramos.module';
@@ -33,6 +35,8 @@ import { ExportacionExcelModule } from './exportacion-excel/exportacion-excel.mo
     ConsolidadoModule,
     InformeTecnicoModule,
     ExportacionExcelModule,
+    UsersModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -55,7 +55,8 @@ export class ValidacionesService {
     // Ejecutar todas las reglas
     await this.regla1_TransformadorSinTierrasMT(visitaId);
     await this.regla2_EstructuraMTEnBT(visitaId);
-    await this.regla3_UsuarioSinMedidor(visitaId);
+    await this.regla3_ApoyoBTSinTierras(visitaId);
+    await this.regla4_UsuarioSinMedidor(visitaId);
 
     // Retornar inconsistencias generadas
     return this.findByVisita(visitaId);
@@ -110,10 +111,39 @@ export class ValidacionesService {
   }
 
   /**
-   * REGLA 3: Si un usuario beneficiario no tiene número de medidor registrado,
+   * REGLA 3: Si un apoyo tiene nivel de tensión Baja Tensión (BT) y no reporta tierras BT,
+   * se genera una alerta de advertencia.
+   */
+  private async regla3_ApoyoBTSinTierras(visitaId: string): Promise<void> {
+    const apoyos = await this.apoyosService.findAll(visitaId);
+
+    for (const apoyo of apoyos) {
+      const nivelTension = String(apoyo.nivel_tension ?? '')
+        .trim()
+        .toLowerCase();
+      const esBT =
+        nivelTension === 'baja tensión (bt)' ||
+        nivelTension === 'baja tension (bt)' ||
+        nivelTension === 'bt';
+
+      if (esBT && Number(apoyo.tierras_bt ?? 0) === 0) {
+        await this.create({
+          visita_id: visitaId,
+          apoyo_id: apoyo.id,
+          numero_regla: 3,
+          descripcion: 'Apoyo BT sin tierras de puesta a tierra',
+          mensaje: `El apoyo N° ${apoyo.numero} requiere sistema de puesta a tierra en Baja Tensión`,
+          severidad: 'WARNING',
+        });
+      }
+    }
+  }
+
+  /**
+   * REGLA 4: Si un usuario beneficiario no tiene número de medidor registrado,
    * se genera una alerta.
    */
-  private async regla3_UsuarioSinMedidor(visitaId: string): Promise<void> {
+  private async regla4_UsuarioSinMedidor(visitaId: string): Promise<void> {
     const usuarios = await this.usuariosService.findAll(visitaId);
 
     for (const usuario of usuarios) {
@@ -121,7 +151,7 @@ export class ValidacionesService {
         await this.create({
           visita_id: visitaId,
           usuario_id: usuario.id,
-          numero_regla: 3,
+          numero_regla: 4,
           descripcion: 'Usuario sin número de medidor',
           mensaje: `Usuario ${usuario.nombre || 'sin nombre'}: No tiene número de medidor registrado`,
           severidad: 'INFO',
