@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { Layout } from '@/components/layout';
 
 type Apoyo = {
   id: string;
@@ -76,20 +77,21 @@ export default function TestTramosPage() {
   };
 
   return (
-    <main className="min-h-screen bg-slate-50 py-10 px-4 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-3xl bg-white rounded-3xl shadow-xl border border-slate-200 p-8">
-        <h1 className="text-3xl font-semibold text-slate-900 mb-4">Crear Tramo</h1>
-        <p className="text-sm text-slate-500 mb-6">
-          Formulario simple para seleccionar apoyos y enviar un nuevo tramo a la API.
-        </p>
+    <Layout>
+      <main className="min-h-screen bg-slate-50 py-10 px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-3xl bg-white rounded-3xl shadow-xl border border-slate-200 p-8">
+          <h1 className="text-3xl font-semibold text-slate-900 mb-4">Crear Tramo</h1>
+          <p className="text-sm text-slate-500 mb-6">
+            Formulario simple para seleccionar apoyos y enviar un nuevo tramo a la API.
+          </p>
 
-        {error ? (
-          <div className="rounded-md bg-red-50 border border-red-200 p-4 mb-6 text-sm text-red-700">
-            {error}
-          </div>
-        ) : null}
+          {error ? (
+            <div className="rounded-md bg-red-50 border border-red-200 p-4 mb-6 text-sm text-red-700">
+              {error}
+            </div>
+          ) : null}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <label className="block">
               <span className="text-sm font-medium text-slate-700">Apoyo Origen</span>
@@ -161,5 +163,6 @@ export default function TestTramosPage() {
         </form>
       </div>
     </main>
+  </Layout>
   );
 }

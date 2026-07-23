@@ -33,12 +33,10 @@ export class ApoyosService {
     return this.apoyosRepository.save(apoyo);
   }
 
-  async findAll(visitaId: string): Promise<Apoyo[]> {
-    if (!visitaId) {
-      throw new BadRequestException('visita_id es requerido');
-    }
+  async findAll(visitaId?: string): Promise<Apoyo[]> {
+    const where = visitaId ? { visita_id: visitaId } : {};
     return this.apoyosRepository.find({
-      where: { visita_id: visitaId },
+      where,
       order: { numero: 'ASC' },
     });
   }

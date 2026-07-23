@@ -2,7 +2,7 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 // Cliente HTTP genérico
-async function apiCall<T>(
+async function apiCall<T = any>(
   endpoint: string,
   options?: RequestInit
 ): Promise<T> {
