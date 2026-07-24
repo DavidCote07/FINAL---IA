@@ -21,7 +21,8 @@ export class ApoyosService {
 
     const { estructuras, ...apoyoData } = createApoyoDto;
 
-    const apoyo = this.apoyosRepository.create(apoyoData);
+    const numero = await this.nextNumero(createApoyoDto.visita_id);
+    const apoyo = this.apoyosRepository.create({ ...apoyoData, numero });
 
     // Si hay estructuras, agregarlas
     if (estructuras && estructuras.length > 0) {
@@ -93,13 +94,21 @@ export class ApoyosService {
     await this.apoyosRepository.delete({ visita_id: visitaId });
   }
 
+  private async nextNumero(visitaId: string): Promise<number> {
+    const result = await this.apoyosRepository
+      .createQueryBuilder('apoyo')
+      .select('MAX(apoyo.numero)', 'max')
+      .where('apoyo.visita_id = :visitaId', { visitaId })
+      .getRawOne<{ max: number | null }>();
+
+    return Number(result?.max ?? 0) + 1;
+  }
+
   private validateQuantities(dto: CreateApoyoDto | UpdateApoyoDto): void {
     const quantities = {
       perchas: dto.perchas,
       templetes_bt: dto.templetes_bt,
-      templetes_mt: dto.templetes_mt,
       tierras_bt: dto.tierras_bt,
-      tierras_mt: dto.tierras_mt,
       conectores: dto.conectores,
     };
 

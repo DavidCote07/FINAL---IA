@@ -141,9 +141,12 @@ export const consolidadoApi = {
 export const informeApi = {
   getCompleto: (visitaId: string) =>
     apiCall(`/informe-tecnico/${visitaId}`),
-  
+
   getResumen: (visitaId: string) =>
     apiCall(`/informe-tecnico/${visitaId}/resumen`),
+
+  getTotal: () =>
+    apiCall(`/informe-tecnico/total`),
 };
 
 // ===== EXPORTACIÓN EXCEL =====

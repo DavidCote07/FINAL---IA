@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UsuarioBeneficiario } from './entities/usuario-beneficiario.entity';
@@ -21,12 +21,10 @@ export class UsuariosBeneficiariosService {
     return this.usuariosRepository.save(usuario);
   }
 
-  async findAll(visitaId: string): Promise<UsuarioBeneficiario[]> {
-    if (!visitaId) {
-      throw new BadRequestException('visita_id es requerido');
-    }
+  async findAll(visitaId?: string): Promise<UsuarioBeneficiario[]> {
+    const where = visitaId ? { visita_id: visitaId } : {};
     return this.usuariosRepository.find({
-      where: { visita_id: visitaId },
+      where,
       order: { createdAt: 'ASC' },
     });
   }

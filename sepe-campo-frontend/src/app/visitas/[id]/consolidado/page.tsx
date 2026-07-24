@@ -135,11 +135,10 @@ export default function ConsolidadoPage() {
       ) : (
         <>
           {/* Totales generales */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
             <Stat label="Usuarios" value={consolidado.total_usuarios} />
             <Stat label="Apoyos" value={consolidado.total_apoyos} />
             <Stat label="Tramos" value={consolidado.total_tramos} />
-            <Stat label="Transformadores" value={consolidado.total_transformadores} />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
@@ -149,9 +148,7 @@ export default function ConsolidadoPage() {
               <dl className="grid grid-cols-2 gap-y-2 text-sm">
                 <Row label="Perchas" value={consolidado.total_perchas} />
                 <Row label="Templetes BT" value={consolidado.total_templetes_bt} />
-                <Row label="Templetes MT" value={consolidado.total_templetes_mt} />
                 <Row label="Tierras BT" value={consolidado.total_tierras_bt} />
-                <Row label="Tierras MT" value={consolidado.total_tierras_mt} />
                 <Row label="Conectores" value={consolidado.total_conectores} />
                 <Row label="Longitud total (m)" value={consolidado.total_longitud_ml} />
                 <Row label="Conductor ACSR total (m)" value={consolidado.total_acsr} />

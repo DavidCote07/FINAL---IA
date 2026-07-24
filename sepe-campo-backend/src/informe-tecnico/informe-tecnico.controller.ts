@@ -1,5 +1,5 @@
 import { Controller, Get, Param } from '@nestjs/common';
-import { InformeTecnicoService } from './informe-tecnico.service';
+import { InformeTecnicoService, InformeTotal } from './informe-tecnico.service';
 
 interface InformeTecnico {
   visita: {
@@ -30,6 +30,14 @@ export class InformeTecnicoController {
   constructor(
     private readonly informeTecnicoService: InformeTecnicoService,
   ) {}
+
+  /**
+   * Genera el informe total consolidando todas las visitas
+   */
+  @Get('total')
+  async generateInformeTotal(): Promise<InformeTotal> {
+    return this.informeTecnicoService.generateInformeTotal();
+  }
 
   /**
    * Genera el informe técnico completo para una visita

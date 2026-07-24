@@ -29,12 +29,10 @@ export class TramosService {
     return this.tramosRepository.save(tramo);
   }
 
-  async findAll(visitaId: string): Promise<Tramo[]> {
-    if (!visitaId) {
-      throw new BadRequestException('visita_id es requerido');
-    }
+  async findAll(visitaId?: string): Promise<Tramo[]> {
+    const where = visitaId ? { visita_id: visitaId } : {};
     return this.tramosRepository.find({
-      where: { visita_id: visitaId },
+      where,
       order: { createdAt: 'ASC' },
     });
   }

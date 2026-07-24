@@ -30,9 +30,6 @@ export class UsuarioBeneficiario {
   @Column({ length: 100, nullable: true })
   tipo_medidor: string;
 
-  @Column({ length: 100, nullable: true })
-  acometida: string;
-
   @Column({ type: 'text', nullable: true })
   observaciones: string;
 

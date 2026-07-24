@@ -53,68 +53,18 @@ export class ValidacionesService {
     await this.clearByVisita(visitaId);
 
     // Ejecutar todas las reglas
-    await this.regla1_TransformadorSinTierrasMT(visitaId);
-    await this.regla2_EstructuraMTEnBT(visitaId);
-    await this.regla3_ApoyoBTSinTierras(visitaId);
-    await this.regla4_UsuarioSinMedidor(visitaId);
+    await this.regla1_ApoyoBTSinTierras(visitaId);
+    await this.regla2_UsuarioSinMedidor(visitaId);
 
     // Retornar inconsistencias generadas
     return this.findByVisita(visitaId);
   }
 
   /**
-   * REGLA 1: Si un apoyo reporta transformador pero no reporta tierras de MT,
-   * se genera una alerta.
-   */
-  private async regla1_TransformadorSinTierrasMT(
-    visitaId: string,
-  ): Promise<void> {
-    const apoyos = await this.apoyosService.findAll(visitaId);
-
-    for (const apoyo of apoyos) {
-      if (apoyo.transformador && apoyo.tierras_mt === 0) {
-        await this.create({
-          visita_id: visitaId,
-          apoyo_id: apoyo.id,
-          numero_regla: 1,
-          descripcion: 'Transformador sin tierras MT',
-          mensaje: `Apoyo ${apoyo.numero}: Tiene transformador pero no reporta tierras de media tensión`,
-          severidad: 'WARNING',
-        });
-      }
-    }
-  }
-
-  /**
-   * REGLA 2: Si un apoyo reporta estructura MT pero su nivel de tensión registrado es BT,
-   * se genera una alerta.
-   */
-  private async regla2_EstructuraMTEnBT(visitaId: string): Promise<void> {
-    const apoyos = await this.apoyosService.findAll(visitaId);
-
-    for (const apoyo of apoyos) {
-      if (
-        apoyo.nivel_tension === 'BT' &&
-        apoyo.estructuras &&
-        apoyo.estructuras.length > 0
-      ) {
-        await this.create({
-          visita_id: visitaId,
-          apoyo_id: apoyo.id,
-          numero_regla: 2,
-          descripcion: 'Estructura MT en nivel BT',
-          mensaje: `Apoyo ${apoyo.numero}: Nivel de tensión es BT pero tiene estructuras MT asociadas`,
-          severidad: 'WARNING',
-        });
-      }
-    }
-  }
-
-  /**
-   * REGLA 3: Si un apoyo tiene nivel de tensión Baja Tensión (BT) y no reporta tierras BT,
+   * REGLA 1: Si un apoyo tiene nivel de tensión Baja Tensión (BT) y no reporta tierras BT,
    * se genera una alerta de advertencia.
    */
-  private async regla3_ApoyoBTSinTierras(visitaId: string): Promise<void> {
+  private async regla1_ApoyoBTSinTierras(visitaId: string): Promise<void> {
     const apoyos = await this.apoyosService.findAll(visitaId);
 
     for (const apoyo of apoyos) {
@@ -130,7 +80,7 @@ export class ValidacionesService {
         await this.create({
           visita_id: visitaId,
           apoyo_id: apoyo.id,
-          numero_regla: 3,
+          numero_regla: 1,
           descripcion: 'Apoyo BT sin tierras de puesta a tierra',
           mensaje: `El apoyo N° ${apoyo.numero} requiere sistema de puesta a tierra en Baja Tensión`,
           severidad: 'WARNING',
@@ -140,10 +90,10 @@ export class ValidacionesService {
   }
 
   /**
-   * REGLA 4: Si un usuario beneficiario no tiene número de medidor registrado,
+   * REGLA 2: Si un usuario beneficiario no tiene número de medidor registrado,
    * se genera una alerta.
    */
-  private async regla4_UsuarioSinMedidor(visitaId: string): Promise<void> {
+  private async regla2_UsuarioSinMedidor(visitaId: string): Promise<void> {
     const usuarios = await this.usuariosService.findAll(visitaId);
 
     for (const usuario of usuarios) {
@@ -151,7 +101,7 @@ export class ValidacionesService {
         await this.create({
           visita_id: visitaId,
           usuario_id: usuario.id,
-          numero_regla: 4,
+          numero_regla: 2,
           descripcion: 'Usuario sin número de medidor',
           mensaje: `Usuario ${usuario.nombre || 'sin nombre'}: No tiene número de medidor registrado`,
           severidad: 'INFO',

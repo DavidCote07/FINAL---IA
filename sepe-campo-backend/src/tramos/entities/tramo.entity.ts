@@ -39,6 +39,9 @@ export class Tramo {
   @Column({ length: 50 })
   nivel_tension: string; // BT, MT
 
+  @Column({ length: 20 })
+  tipo_cable: string; // DUPLEX, TRIPLEX
+
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   longitud_ml: number;
 

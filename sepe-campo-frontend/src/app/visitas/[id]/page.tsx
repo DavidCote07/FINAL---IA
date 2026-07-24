@@ -40,28 +40,24 @@ export default function DetalleVisitaPage() {
     nombre: '',
     num_medidor: '',
     tipo_medidor: '',
-    acometida: '',
     observaciones: '',
   });
 
   const [apoyoForm, setApoyoForm] = useState({
-    numero: 1,
-    nivel_tension: 'BT',
     tipo_poste: '',
     codigo: '',
+    poste_nuevo: true,
     perchas: 0,
     templetes_bt: 0,
-    templetes_mt: 0,
     tierras_bt: 0,
-    tierras_mt: 0,
     conectores: 0,
-    transformador: false,
+    observaciones: '',
   });
 
   const [tramoForm, setTramoForm] = useState({
     apoyo_origen_id: '',
     apoyo_destino_id: '',
-    nivel_tension: 'BT',
+    tipo_cable: 'DUPLEX',
     longitud_ml: 0,
     observaciones: '',
   });
@@ -161,7 +157,6 @@ export default function DetalleVisitaPage() {
         nombre: '',
         num_medidor: '',
         tipo_medidor: '',
-        acometida: '',
         observaciones: '',
       });
       await loadData();
@@ -173,37 +168,28 @@ export default function DetalleVisitaPage() {
   const handleAgregarApoyo = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      if (!apoyoForm.numero) {
-        throw new Error('El número de apoyo no puede estar vacío.');
-      }
-
       await apoyosApi.create({
         visita_id: visitaId,
-        numero: apoyoForm.numero,
-        nivel_tension: apoyoForm.nivel_tension,
+        nivel_tension: 'BT',
         tipo_poste: apoyoForm.tipo_poste || undefined,
         codigo: apoyoForm.codigo || undefined,
+        poste_nuevo: apoyoForm.poste_nuevo,
         perchas: apoyoForm.perchas,
         templetes_bt: apoyoForm.templetes_bt,
-        templetes_mt: apoyoForm.templetes_mt,
         tierras_bt: apoyoForm.tierras_bt,
-        tierras_mt: apoyoForm.tierras_mt,
         conectores: apoyoForm.conectores,
-        transformador: apoyoForm.transformador,
+        observaciones: apoyoForm.observaciones || undefined,
       });
 
       setApoyoForm({
-        numero: apoyos.length + 1,
-        nivel_tension: 'BT',
         tipo_poste: '',
         codigo: '',
+        poste_nuevo: true,
         perchas: 0,
         templetes_bt: 0,
-        templetes_mt: 0,
         tierras_bt: 0,
-        tierras_mt: 0,
         conectores: 0,
-        transformador: false,
+        observaciones: '',
       });
       await loadData();
     } catch (err) {
@@ -225,13 +211,14 @@ export default function DetalleVisitaPage() {
       await tramosApi.create({
         visita_id: visitaId,
         ...tramoForm,
+        nivel_tension: 'BT',
         longitud_ml: Number(tramoForm.longitud_ml),
       });
 
       setTramoForm({
         apoyo_origen_id: '',
         apoyo_destino_id: '',
-        nivel_tension: 'BT',
+        tipo_cable: 'DUPLEX',
         longitud_ml: 0,
         observaciones: '',
       });
@@ -373,12 +360,6 @@ export default function DetalleVisitaPage() {
                 onChange={(e) => setUsuarioForm({ ...usuarioForm, tipo_medidor: e.target.value })}
               />
               <FormField
-                label="Acometida"
-                name="acometida"
-                value={usuarioForm.acometida}
-                onChange={(e) => setUsuarioForm({ ...usuarioForm, acometida: e.target.value })}
-              />
-              <FormField
                 label="Observaciones"
                 name="observaciones"
                 type="textarea"
@@ -410,24 +391,6 @@ export default function DetalleVisitaPage() {
             <Form onSubmit={handleAgregarApoyo}>
               <h4 className="text-lg font-semibold mb-4 text-gray-700">Agregar Apoyo</h4>
               <FormField
-                label="Número de Apoyo"
-                name="numero"
-                type="number"
-                value={apoyoForm.numero}
-                onChange={(e) => setApoyoForm({ ...apoyoForm, numero: parseInt(e.target.value) })}
-              />
-              <FormField
-                label="Nivel de Tensión"
-                name="nivel_tension"
-                type="select"
-                value={apoyoForm.nivel_tension}
-                options={[
-                  { value: 'BT', label: 'Baja Tensión (BT)' },
-                  { value: 'MT', label: 'Media Tensión (MT)' },
-                ]}
-                onChange={(e) => setApoyoForm({ ...apoyoForm, nivel_tension: e.target.value })}
-              />
-              <FormField
                 label="Tipo de Poste"
                 name="tipo_poste"
                 value={apoyoForm.tipo_poste}
@@ -440,6 +403,14 @@ export default function DetalleVisitaPage() {
                 value={apoyoForm.codigo}
                 onChange={(e) => setApoyoForm({ ...apoyoForm, codigo: e.target.value })}
               />
+              <label className="flex items-center gap-2 mb-4 text-sm text-gray-700">
+                <input
+                  type="checkbox"
+                  checked={!apoyoForm.poste_nuevo}
+                  onChange={(e) => setApoyoForm({ ...apoyoForm, poste_nuevo: !e.target.checked })}
+                />
+                Poste Existente (marcar con X; si no, se considera Nuevo)
+              </label>
               <div className="grid grid-cols-2 gap-4">
                 <FormField
                   label="Perchas"
@@ -456,25 +427,11 @@ export default function DetalleVisitaPage() {
                   onChange={(e) => setApoyoForm({ ...apoyoForm, templetes_bt: parseInt(e.target.value) })}
                 />
                 <FormField
-                  label="Templetes MT"
-                  name="templetes_mt"
-                  type="number"
-                  value={apoyoForm.templetes_mt}
-                  onChange={(e) => setApoyoForm({ ...apoyoForm, templetes_mt: parseInt(e.target.value) })}
-                />
-                <FormField
                   label="Tierras BT"
                   name="tierras_bt"
                   type="number"
                   value={apoyoForm.tierras_bt}
                   onChange={(e) => setApoyoForm({ ...apoyoForm, tierras_bt: parseInt(e.target.value) })}
-                />
-                <FormField
-                  label="Tierras MT"
-                  name="tierras_mt"
-                  type="number"
-                  value={apoyoForm.tierras_mt}
-                  onChange={(e) => setApoyoForm({ ...apoyoForm, tierras_mt: parseInt(e.target.value) })}
                 />
                 <FormField
                   label="Conectores"
@@ -484,14 +441,13 @@ export default function DetalleVisitaPage() {
                   onChange={(e) => setApoyoForm({ ...apoyoForm, conectores: parseInt(e.target.value) })}
                 />
               </div>
-              <label className="flex items-center gap-2 mt-4 mb-2 text-sm text-gray-700">
-                <input
-                  type="checkbox"
-                  checked={apoyoForm.transformador}
-                  onChange={(e) => setApoyoForm({ ...apoyoForm, transformador: e.target.checked })}
-                />
-                Tiene transformador
-              </label>
+              <FormField
+                label="Observaciones Generales"
+                name="observaciones"
+                type="textarea"
+                value={apoyoForm.observaciones}
+                onChange={(e) => setApoyoForm({ ...apoyoForm, observaciones: e.target.value })}
+              />
             </Form>
 
             <h4 className="text-lg font-semibold mt-8 mb-4">Apoyos Registrados</h4>
@@ -501,13 +457,25 @@ export default function DetalleVisitaPage() {
               <div className="space-y-4">
                 {apoyos.map((apoyo) => (
                   <div key={apoyo.id} className="p-4 border border-gray-200 rounded">
-                    <p className="font-semibold">Apoyo {apoyo.numero} - {apoyo.nivel_tension}</p>
+                    <p className="font-semibold">
+                      Apoyo {apoyo.numero}{' '}
+                      <span
+                        className={`text-xs font-semibold uppercase tracking-wide px-2 py-0.5 rounded ${
+                          apoyo.poste_nuevo ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
+                        }`}
+                      >
+                        {apoyo.poste_nuevo ? 'Nuevo' : 'Existente'}
+                      </span>
+                    </p>
                     <p className="text-sm text-gray-500">
                       {apoyo.codigo ? `Código: ${apoyo.codigo}` : 'Código: sin asignar'}
                     </p>
                     <p className="text-sm text-gray-600">
-                      Perchas: {apoyo.perchas} | Templetes BT: {apoyo.templetes_bt} | Templetes MT: {apoyo.templetes_mt}
+                      Perchas: {apoyo.perchas} | Templetes BT: {apoyo.templetes_bt} | Tierras BT: {apoyo.tierras_bt}
                     </p>
+                    {apoyo.observaciones && (
+                      <p className="text-sm text-gray-600 mt-2">Observaciones: {apoyo.observaciones}</p>
+                    )}
                   </div>
                 ))}
               </div>
@@ -524,7 +492,7 @@ export default function DetalleVisitaPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Apoyo Origen</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Apoyo Origen (código)</label>
                   <select
                     name="apoyo_origen_id"
                     value={tramoForm.apoyo_origen_id}
@@ -534,14 +502,14 @@ export default function DetalleVisitaPage() {
                     <option value="">-- Selecciona apoyo origen --</option>
                     {apoyos.map((apoyo) => (
                       <option key={apoyo.id} value={apoyo.id}>
-                        {`Apoyo ${apoyo.numero} (${apoyo.nivel_tension})`}
+                        {apoyo.codigo || `Apoyo ${apoyo.numero} (sin código)`}
                       </option>
                     ))}
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Apoyo Destino</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Apoyo Destino (código)</label>
                   <select
                     name="apoyo_destino_id"
                     value={tramoForm.apoyo_destino_id}
@@ -551,27 +519,27 @@ export default function DetalleVisitaPage() {
                     <option value="">-- Selecciona apoyo destino --</option>
                     {apoyos.map((apoyo) => (
                       <option key={apoyo.id} value={apoyo.id}>
-                        {`Apoyo ${apoyo.numero} (${apoyo.nivel_tension})`}
+                        {apoyo.codigo || `Apoyo ${apoyo.numero} (sin código)`}
                       </option>
                     ))}
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Nivel de Tensión</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Cable</label>
                   <select
-                    name="nivel_tension"
-                    value={tramoForm.nivel_tension}
-                    onChange={(e) => setTramoForm({ ...tramoForm, nivel_tension: e.target.value })}
+                    name="tipo_cable"
+                    value={tramoForm.tipo_cable}
+                    onChange={(e) => setTramoForm({ ...tramoForm, tipo_cable: e.target.value })}
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   >
-                    <option value="BT">BT</option>
-                    <option value="MT">MT</option>
+                    <option value="DUPLEX">Dúplex</option>
+                    <option value="TRIPLEX">Triplex</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Longitud (m)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Longitud (metros)</label>
                   <input
                     name="longitud_ml"
                     type="number"
@@ -612,10 +580,12 @@ export default function DetalleVisitaPage() {
                   {tramos.map((tramo) => (
                     <div key={tramo.id} className="p-4 border border-gray-200 rounded">
                       <p className="font-semibold">
-                        Apoyo {tramo.apoyo_origen?.numero} → Apoyo {tramo.apoyo_destino?.numero}
+                        {tramo.apoyo_origen?.codigo || `Apoyo ${tramo.apoyo_origen?.numero}`}
+                        {' → '}
+                        {tramo.apoyo_destino?.codigo || `Apoyo ${tramo.apoyo_destino?.numero}`}
                       </p>
                       <p className="text-sm text-gray-600">
-                        Longitud: {tramo.longitud_ml} ml | Tensión: {tramo.nivel_tension}
+                        Cable: {tramo.tipo_cable === 'TRIPLEX' ? 'Triplex' : 'Dúplex'} | Longitud: {tramo.longitud_ml} metros
                       </p>
                       {tramo.observaciones && (
                         <p className="text-sm text-gray-600 mt-2">Observaciones: {tramo.observaciones}</p>
@@ -631,35 +601,80 @@ export default function DetalleVisitaPage() {
         {activeTab === 'validaciones' && (
           <div>
             <h3 className="text-2xl font-bold mb-4">Inconsistencias Detectadas</h3>
-            {loadingInconsistencias ? (
-              <p className="text-gray-600">Cargando advertencias...</p>
-            ) : inconsistencias.length === 0 ? (
-              <p className="text-gray-600">No hay advertencias registradas para esta visita.</p>
-            ) : (
-              <div className="space-y-4">
-                {inconsistencias.map((inc) => (
-                  <div
-                    key={inc.id}
-                    className={`p-4 border rounded ${
-                      inc.severidad === 'WARNING'
-                        ? 'border-yellow-400 bg-yellow-50'
-                        : inc.severidad === 'ERROR'
-                          ? 'border-red-400 bg-red-50'
-                          : 'border-blue-400 bg-blue-50'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between gap-2 mb-2">
-                      <p className="font-semibold">{inc.descripcion}</p>
-                      <span className="text-xs font-semibold uppercase tracking-wide text-gray-700">
-                        {inc.severidad || 'INFO'}
-                      </span>
+            {(() => {
+              const notas = [
+                ...usuarios
+                  .filter((u) => u.observaciones)
+                  .map((u) => ({
+                    key: `usuario-${u.id}`,
+                    origen: `Usuario: ${u.nombre || 'Sin nombre'}`,
+                    texto: u.observaciones as string,
+                  })),
+                ...apoyos
+                  .filter((a) => a.observaciones)
+                  .map((a) => ({
+                    key: `apoyo-${a.id}`,
+                    origen: `Apoyo: ${a.codigo || a.numero}`,
+                    texto: a.observaciones as string,
+                  })),
+                ...tramos
+                  .filter((t) => t.observaciones)
+                  .map((t) => ({
+                    key: `tramo-${t.id}`,
+                    origen: `Tramo: ${t.apoyo_origen?.codigo || t.apoyo_origen?.numero} → ${t.apoyo_destino?.codigo || t.apoyo_destino?.numero}`,
+                    texto: t.observaciones as string,
+                  })),
+              ];
+
+              if (loadingInconsistencias) {
+                return <p className="text-gray-600">Cargando advertencias...</p>;
+              }
+
+              if (inconsistencias.length === 0 && notas.length === 0) {
+                return (
+                  <p className="text-gray-600">
+                    No hay advertencias ni observaciones registradas para esta visita.
+                  </p>
+                );
+              }
+
+              return (
+                <div className="space-y-4">
+                  {inconsistencias.map((inc) => (
+                    <div
+                      key={inc.id}
+                      className={`p-4 border rounded ${
+                        inc.severidad === 'WARNING'
+                          ? 'border-yellow-400 bg-yellow-50'
+                          : inc.severidad === 'ERROR'
+                            ? 'border-red-400 bg-red-50'
+                            : 'border-blue-400 bg-blue-50'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-2 mb-2">
+                        <p className="font-semibold">{inc.descripcion}</p>
+                        <span className="text-xs font-semibold uppercase tracking-wide text-gray-700">
+                          {inc.severidad || 'INFO'}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-700">{inc.mensaje}</p>
+                      <p className="text-xs text-gray-500 mt-2">Regla {inc.numero_regla}</p>
                     </div>
-                    <p className="text-sm text-gray-700">{inc.mensaje}</p>
-                    <p className="text-xs text-gray-500 mt-2">Regla {inc.numero_regla}</p>
-                  </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                  {notas.map((nota) => (
+                    <div key={nota.key} className="p-4 border border-blue-400 bg-blue-50 rounded">
+                      <div className="flex items-center justify-between gap-2 mb-2">
+                        <p className="font-semibold">{nota.origen}</p>
+                        <span className="text-xs font-semibold uppercase tracking-wide text-gray-700">
+                          OBSERVACIÓN
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-700">{nota.texto}</p>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
           </div>
         )}
 
@@ -682,6 +697,41 @@ export default function DetalleVisitaPage() {
               <div className="bg-orange-50 p-4 rounded">
                 <p className="text-gray-600 text-sm">ACSR Total (ml)</p>
                 <p className="text-3xl font-bold text-orange-600">{informe.resumen_ejecutivo.total_acsr}</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+              <div className="bg-gray-50 p-4 rounded">
+                <p className="text-gray-600 text-sm">Total Perchas</p>
+                <p className="text-2xl font-bold text-gray-800">{informe.resumen_ejecutivo.total_perchas}</p>
+              </div>
+              <div className="bg-gray-50 p-4 rounded">
+                <p className="text-gray-600 text-sm">Total Templetes BT</p>
+                <p className="text-2xl font-bold text-gray-800">{informe.resumen_ejecutivo.total_templetes_bt}</p>
+              </div>
+              <div className="bg-gray-50 p-4 rounded">
+                <p className="text-gray-600 text-sm">Medidores Tipo A1</p>
+                <p className="text-2xl font-bold text-gray-800">{informe.resumen_ejecutivo.total_medidores_a1}</p>
+              </div>
+              <div className="bg-gray-50 p-4 rounded">
+                <p className="text-gray-600 text-sm">Medidores Tipo A3</p>
+                <p className="text-2xl font-bold text-gray-800">{informe.resumen_ejecutivo.total_medidores_a3}</p>
+              </div>
+              <div className="bg-gray-50 p-4 rounded">
+                <p className="text-gray-600 text-sm">Cable Dúplex Total (m)</p>
+                <p className="text-2xl font-bold text-gray-800">{informe.resumen_ejecutivo.total_cable_duplex_ml}</p>
+              </div>
+              <div className="bg-gray-50 p-4 rounded">
+                <p className="text-gray-600 text-sm">Cable Triplex Total (m)</p>
+                <p className="text-2xl font-bold text-gray-800">{informe.resumen_ejecutivo.total_cable_triplex_ml}</p>
+              </div>
+              <div className="bg-gray-50 p-4 rounded">
+                <p className="text-gray-600 text-sm">Postes Nuevos</p>
+                <p className="text-2xl font-bold text-gray-800">{informe.resumen_ejecutivo.total_postes_nuevos}</p>
+              </div>
+              <div className="bg-gray-50 p-4 rounded">
+                <p className="text-gray-600 text-sm">Postes Existentes</p>
+                <p className="text-2xl font-bold text-gray-800">{informe.resumen_ejecutivo.total_postes_existentes}</p>
               </div>
             </div>
           </div>

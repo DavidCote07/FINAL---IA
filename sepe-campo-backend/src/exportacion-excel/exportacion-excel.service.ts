@@ -99,6 +99,15 @@ export class ExportacionExcelService {
       ['Longitud Total (metros)', resumen.total_longitud_ml],
       ['Conductor ACSR Total (metros)', resumen.total_acsr],
       [''],
+      ['Total Perchas', resumen.total_perchas],
+      ['Total Templetes BT', resumen.total_templetes_bt],
+      ['Medidores Tipo A1', resumen.total_medidores_a1],
+      ['Medidores Tipo A3', resumen.total_medidores_a3],
+      ['Cable Dúplex Total (metros)', resumen.total_cable_duplex_ml],
+      ['Cable Triplex Total (metros)', resumen.total_cable_triplex_ml],
+      ['Postes Nuevos', resumen.total_postes_nuevos],
+      ['Postes Existentes', resumen.total_postes_existentes],
+      [''],
       ['CONSOLIDADO POR NIVEL DE TENSIÓN'],
       ['Nivel', 'Apoyos', 'Tramos', 'Longitud (ml)'],
     ];
@@ -121,7 +130,6 @@ export class ExportacionExcelService {
         'Nombre',
         'Número Medidor',
         'Tipo Medidor',
-        'Acometida',
         'Observaciones',
       ],
     ];
@@ -132,7 +140,6 @@ export class ExportacionExcelService {
         usuario.nombre,
         usuario.num_medidor,
         usuario.tipo_medidor,
-        usuario.acometida,
         usuario.observaciones || '',
       ]);
     }
@@ -141,7 +148,6 @@ export class ExportacionExcelService {
     sheet['!cols'] = [
       { wch: 20 },
       { wch: 25 },
-      { wch: 15 },
       { wch: 15 },
       { wch: 15 },
       { wch: 30 },
@@ -156,13 +162,11 @@ export class ExportacionExcelService {
         'Número',
         'Nivel Tensión',
         'Tipo Poste',
+        'Estado',
         'Perchas',
         'Templetes BT',
-        'Templetes MT',
         'Tierras BT',
-        'Tierras MT',
         'Conectores',
-        'Transformador',
         'Coord X',
         'Coord Y',
         'Coord Z',
@@ -176,13 +180,11 @@ export class ExportacionExcelService {
         apoyo.numero,
         apoyo.nivel_tension,
         apoyo.tipo_poste || '',
+        apoyo.poste_nuevo ? 'Nuevo' : 'Existente',
         apoyo.componentes.perchas,
         apoyo.componentes.templetes_bt,
-        apoyo.componentes.templetes_mt,
         apoyo.componentes.tierras_bt,
-        apoyo.componentes.tierras_mt,
         apoyo.componentes.conectores,
-        apoyo.componentes.transformador ? 'Sí' : 'No',
         apoyo.coordenadas.x || '',
         apoyo.coordenadas.y || '',
         apoyo.coordenadas.z || '',
@@ -191,7 +193,7 @@ export class ExportacionExcelService {
     }
 
     const sheet = XLSX.utils.aoa_to_sheet(data);
-    sheet['!cols'] = Array(15).fill({ wch: 15 });
+    sheet['!cols'] = Array(13).fill({ wch: 15 });
     XLSX.utils.book_append_sheet(workbook, sheet, 'Apoyos');
   }
 
@@ -218,7 +220,8 @@ export class ExportacionExcelService {
         'Apoyo Origen',
         'Apoyo Destino',
         'Nivel Tensión',
-        'Longitud (ml)',
+        'Tipo de Cable',
+        'Longitud (m)',
         'Observaciones',
       ],
     ];
@@ -229,6 +232,7 @@ export class ExportacionExcelService {
         tramo.apoyo_origen,
         tramo.apoyo_destino,
         tramo.nivel_tension,
+        tramo.tipo_cable,
         tramo.longitud_ml,
         tramo.observaciones || '',
       ]);
@@ -237,6 +241,7 @@ export class ExportacionExcelService {
     const sheet = XLSX.utils.aoa_to_sheet(data);
     sheet['!cols'] = [
       { wch: 20 },
+      { wch: 15 },
       { wch: 15 },
       { wch: 15 },
       { wch: 15 },
@@ -260,11 +265,8 @@ export class ExportacionExcelService {
       ['COMPONENTES TOTALES'],
       ['Perchas', consolidado.total_perchas],
       ['Templetes BT', consolidado.total_templetes_bt],
-      ['Templetes MT', consolidado.total_templetes_mt],
       ['Tierras BT', consolidado.total_tierras_bt],
-      ['Tierras MT', consolidado.total_tierras_mt],
       ['Conectores', consolidado.total_conectores],
-      ['Transformadores', consolidado.total_transformadores],
       [''],
       ['CONDUCTOR'],
       ['Longitud Total (ml)', consolidado.total_longitud_ml],

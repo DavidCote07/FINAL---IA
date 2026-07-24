@@ -3,6 +3,5 @@ export class CreateUsuarioBeneficiarioDto {
   nombre?: string;
   num_medidor?: string;
   tipo_medidor?: string;
-  acometida?: string;
   observaciones?: string;
 }

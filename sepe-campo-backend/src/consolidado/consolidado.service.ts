@@ -12,11 +12,8 @@ interface ConsolidadoQuantities {
   // Componentes de apoyo
   total_perchas: number;
   total_templetes_bt: number;
-  total_templetes_mt: number;
   total_tierras_bt: number;
-  total_tierras_mt: number;
   total_conectores: number;
-  total_transformadores: number;
 
   // Longitud total
   total_longitud_ml: number;
@@ -68,11 +65,8 @@ export class ConsolidadoService {
       // Componentes
       total_perchas: 0,
       total_templetes_bt: 0,
-      total_templetes_mt: 0,
       total_tierras_bt: 0,
-      total_tierras_mt: 0,
       total_conectores: 0,
-      total_transformadores: 0,
 
       // Longitud
       total_longitud_ml: 0,
@@ -85,13 +79,8 @@ export class ConsolidadoService {
     for (const apoyo of apoyos) {
       consolidado.total_perchas += apoyo.perchas;
       consolidado.total_templetes_bt += apoyo.templetes_bt;
-      consolidado.total_templetes_mt += apoyo.templetes_mt;
       consolidado.total_tierras_bt += apoyo.tierras_bt;
-      consolidado.total_tierras_mt += apoyo.tierras_mt;
       consolidado.total_conectores += apoyo.conectores;
-      if (apoyo.transformador) {
-        consolidado.total_transformadores += 1;
-      }
 
       // Agregar por nivel de tensión
       if (!consolidado.by_nivel_tension[apoyo.nivel_tension]) {

@@ -35,6 +35,9 @@ export class Apoyo {
   @Column({ length: 50, nullable: true })
   codigo: string;
 
+  @Column({ type: 'boolean', default: true })
+  poste_nuevo: boolean; // true = nuevo, false = existente
+
   @Column({ type: 'int', default: 0 })
   perchas: number;
 
@@ -42,19 +45,10 @@ export class Apoyo {
   templetes_bt: number;
 
   @Column({ type: 'int', default: 0 })
-  templetes_mt: number;
-
-  @Column({ type: 'int', default: 0 })
   tierras_bt: number;
 
   @Column({ type: 'int', default: 0 })
-  tierras_mt: number;
-
-  @Column({ type: 'int', default: 0 })
   conectores: number;
-
-  @Column({ type: 'boolean', default: false })
-  transformador: boolean;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   coord_x: number;

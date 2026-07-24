@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, Min, IsString, IsOptional } from 'class-validator';
+import { IsNotEmpty, IsNumber, Min, IsString, IsOptional, IsIn } from 'class-validator';
 
 export class CreateTramoDto {
   @IsNotEmpty()
@@ -13,6 +13,10 @@ export class CreateTramoDto {
   @IsString()
   @IsNotEmpty()
   nivel_tension: string;
+
+  @IsString()
+  @IsIn(['DUPLEX', 'TRIPLEX'])
+  tipo_cable: string;
 
   @IsNumber()
   @Min(0)

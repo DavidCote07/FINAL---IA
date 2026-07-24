@@ -8,11 +8,8 @@ interface ConsolidadoQuantities {
   total_acsr: number;
   total_perchas: number;
   total_templetes_bt: number;
-  total_templetes_mt: number;
   total_tierras_bt: number;
-  total_tierras_mt: number;
   total_conectores: number;
-  total_transformadores: number;
   total_longitud_ml: number;
   by_nivel_tension: {
     [key: string]: {

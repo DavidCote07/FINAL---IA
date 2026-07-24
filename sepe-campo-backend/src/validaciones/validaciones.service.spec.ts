@@ -26,7 +26,6 @@ describe('ValidacionesService', () => {
           numero: 12,
           nivel_tension: 'Baja Tensión (BT)',
           tierras_bt: 0,
-          transformador: false,
           estructuras: [],
         },
       ]),
@@ -64,7 +63,7 @@ describe('ValidacionesService', () => {
       expect.objectContaining({
         visita_id: 'visita-1',
         apoyo_id: 'apoyo-1',
-        numero_regla: 3,
+        numero_regla: 1,
         descripcion: 'Apoyo BT sin tierras de puesta a tierra',
         mensaje: 'El apoyo N° 12 requiere sistema de puesta a tierra en Baja Tensión',
         severidad: 'WARNING',
