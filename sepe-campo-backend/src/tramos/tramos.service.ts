@@ -83,15 +83,11 @@ export class TramosService {
   }
 
   /**
-   * Calcula el total de conductor ACSR para una visita
-   * Total = suma de metros de todos los tramos × 2
+   * Calcula el total de replanteo (metros) para una visita
+   * Total = suma de metros de cable dúplex + triplex de todos los tramos
    */
   async calculateTotalACsr(visitaId: string): Promise<number> {
     const tramos = await this.findAll(visitaId);
-    const totalMetros = tramos.reduce(
-      (sum, tramo) => sum + Number(tramo.longitud_ml),
-      0,
-    );
-    return totalMetros * 2; // Dos conductores por metro
+    return tramos.reduce((sum, tramo) => sum + Number(tramo.longitud_ml), 0);
   }
 }

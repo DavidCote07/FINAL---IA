@@ -695,7 +695,7 @@ export default function DetalleVisitaPage() {
                 <p className="text-3xl font-bold text-purple-600">{informe.resumen_ejecutivo.total_tramos}</p>
               </div>
               <div className="bg-orange-50 p-4 rounded">
-                <p className="text-gray-600 text-sm">ACSR Total (ml)</p>
+                <p className="text-gray-600 text-sm">Replanteo Total en Mts</p>
                 <p className="text-3xl font-bold text-orange-600">{informe.resumen_ejecutivo.total_acsr}</p>
               </div>
             </div>

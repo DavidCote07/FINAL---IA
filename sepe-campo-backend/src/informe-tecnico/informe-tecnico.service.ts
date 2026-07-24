@@ -240,7 +240,7 @@ export class InformeTecnicoService {
       total_apoyos: apoyos.length,
       total_usuarios: usuarios.length,
       total_tramos: tramos.length,
-      total_acsr: totalLongitudMl * 2,
+      total_acsr: totalCableDuplexMl + totalCableTriplexMl,
       total_longitud_ml: totalLongitudMl,
       total_perchas: apoyos.reduce((sum, a) => sum + a.perchas, 0),
       total_templetes_bt: apoyos.reduce((sum, a) => sum + a.templetes_bt, 0),

@@ -151,7 +151,7 @@ export default function ConsolidadoPage() {
                 <Row label="Tierras BT" value={consolidado.total_tierras_bt} />
                 <Row label="Conectores" value={consolidado.total_conectores} />
                 <Row label="Longitud total (m)" value={consolidado.total_longitud_ml} />
-                <Row label="Conductor ACSR total (m)" value={consolidado.total_acsr} />
+                <Row label="Replanteo Total en Mts" value={consolidado.total_acsr} />
               </dl>
             </div>
 

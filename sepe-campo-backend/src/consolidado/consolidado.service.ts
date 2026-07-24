@@ -110,8 +110,8 @@ export class ConsolidadoService {
         Number(tramo.longitud_ml);
     }
 
-    // Calcular ACSR total (longitud × 2 conductores)
-    consolidado.total_acsr = consolidado.total_longitud_ml * 2;
+    // Replanteo total = sumatoria del cable dúplex + triplex instalado
+    consolidado.total_acsr = consolidado.total_longitud_ml;
 
     return consolidado;
   }

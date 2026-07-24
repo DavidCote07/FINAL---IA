@@ -81,7 +81,7 @@ export default function DashboardPage() {
           <p className="text-2xl font-bold text-gray-800">{informe.total_longitud_ml}</p>
         </div>
         <div className="bg-gray-50 p-4 rounded">
-          <p className="text-gray-600 text-sm">ACSR Total (m)</p>
+          <p className="text-gray-600 text-sm">Replanteo Total en Mts</p>
           <p className="text-2xl font-bold text-gray-800">{informe.total_acsr}</p>
         </div>
         <div className="bg-gray-50 p-4 rounded">

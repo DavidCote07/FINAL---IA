@@ -97,7 +97,7 @@ export class ExportacionExcelService {
       ['Total de Usuarios Beneficiarios', resumen.total_usuarios],
       ['Total de Tramos', resumen.total_tramos],
       ['Longitud Total (metros)', resumen.total_longitud_ml],
-      ['Conductor ACSR Total (metros)', resumen.total_acsr],
+      ['Replanteo Total en Mts', resumen.total_acsr],
       [''],
       ['Total Perchas', resumen.total_perchas],
       ['Total Templetes BT', resumen.total_templetes_bt],
@@ -270,7 +270,7 @@ export class ExportacionExcelService {
       [''],
       ['CONDUCTOR'],
       ['Longitud Total (ml)', consolidado.total_longitud_ml],
-      ['Conductor ACSR Total (ml)', consolidado.total_acsr],
+      ['Replanteo Total en Mts', consolidado.total_acsr],
     ];
 
     const sheet = XLSX.utils.aoa_to_sheet(data);
