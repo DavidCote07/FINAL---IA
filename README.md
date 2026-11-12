@@ -1,4 +1,4 @@
-# SEPE Campo — Proyecto Final SEMINARIO IA
+# SEPE Campo —  Clase de Profundización IA
 
 Sistema de captura y consolidación de actas de electrificación rural en baja tensión (BT). Un técnico registra en campo los datos de cada visita (usuarios beneficiarios, apoyos y tramos), y el sistema genera automáticamente el consolidado de cantidades, el informe técnico y el archivo Excel corporativo, además de un motor de reglas que detecta inconsistencias.
 
